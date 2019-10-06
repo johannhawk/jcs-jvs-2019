@@ -12,6 +12,10 @@
 		const SHIP_BLINK_DUR = 0.1; //hversu hratt skipid blikkar þegar það hefur "i-frames"
 		const SHIP_INV_DUR = 3;//"i-frame" timabil þegar skipid kemur a skjainn
 
+		const LASER_MAX = 10; //hversu morg skot mega vera a skjanum
+		const LASER_SPEED = 500; //hversu hratt skotinn fara a pixlar/sekundur
+		const LASER_DIST = 0.9; //hversu lengi skotinn verda a skjainn eftir skja vidd
+
 		const SHOW_BOUNDING = false; //syna/fela arekstrar hringi
 		const SHOW_CENTRE_DOT = true; //syna/fela punktinn i midju skipinnu
 
@@ -30,7 +34,7 @@
 		var roids = [];
 		createAsteroidBelt();//byr til loftsteina
 
-		//event handlers
+		//event handlers, tekur eftir hvort lyklar a lyklabordinnu eru snert
 		document.addEventListener("keydown", keyDown);
 		document.addEventListener("keyup", keyUp);
 
@@ -61,6 +65,9 @@
 
 		function keyDown(ev){
 			switch(ev.keyCode){
+				case 32: //spacebar, skytur skot
+					shootLaser();
+					break;
 				case 37: //vinstri orvi, snyr til vinstri
 					ship.rot = TURN_SPEED / 180 * Math.PI / FPS;
 					break;
@@ -75,6 +82,9 @@
 
 		function keyUp(ev) {
 			switch(ev.keyCode){
+				case 32: //spacebar, stoppa og leyfa naesta skotid
+					ship.canShoot = true;
+					break;
 				case 37: //vinstri orvi, haettir snuning til vinstri
 					//ship.rot * 0.25;
 					ship.rot = 0;
@@ -117,7 +127,9 @@
 				a: 90 / 180*Math.PI,  //convert to radians
 				blinkNum: Math.ceil(SHIP_INV_DUR / SHIP_BLINK_DUR),
 				blinkTime: Math.ceil(SHIP_BLINK_DUR * FPS),
+				canShoot: true,
 				explodeTime: 0,
+				lasers: [],
 				rot: 0,
 				thrusting: false,
 				thrust: {//heldur hreyfiorku
@@ -125,6 +137,23 @@
 					y: 0
 				}
 			}
+		}
+
+
+		//hugmynd: mogulega bara skjota sjalfkrafa og nota spacebar til ad skjota staerri skot
+		function shootLaser() {
+			//byr til skotid og setur hradan fyrir það
+			if (ship.canShoot && ship.lasers.length < LASER_MAX){
+				ship.lasers.push({//fra nef skipsins
+					x: ship.x + 4/3 * ship.r * Math.cos(ship.a),
+					y: ship.y - 4/3 * ship.r * Math.sin(ship.a),
+					xv: LASER_SPEED * Math.cos(ship.a) / FPS,
+					yv: -LASER_SPEED * Math.sin(ship.a) / FPS,
+					dist: 0
+				})
+			}
+			//stoppar fleiri skot
+			ship.canShoot = false;
 		}
 
 		function update() {
@@ -235,6 +264,43 @@
 
 			}
 
+			//teikna skot
+			for (var i = 0; i < ship.lasers.length; i++) {
+				ctx.fillStyle = "salmon";
+				ctx.beginPath();
+				ctx.arc(ship.lasers[i].x, ship.lasers[i].y, SHIP_SIZE / 15, 0 , Math.PI * 2, false);
+				ctx.fill();
+			}
+
+			//kikja þegar skot hitta loftsteina
+			var ax, ay, ar, lx, ly;//ax/ay eru fyrir loftsteina, lx/ly eru fyrir skotin
+			for (var i = roids.length - 1; i >= 0; i--) {
+
+				//saekja loftsteina properties
+				ax = roids[i].x;
+				ay = roids[i].y;
+				ar = roids[i].r;
+
+				// setja loop yfir skotinn
+				for (var j = ship.lasers.length - 1; j >= 0; j--) {
+
+					//saekja skot properties
+					lx = ship.lasers[j].x;
+					ly = ship.lasers[j].y;
+
+					// kikja hvort skotin hitta
+					if (distBetweenPoints(ax,ay,lx,ly) < ar) {
+
+						//fjarlega skot
+						ship.lasers.splice(j,1);
+
+						//fjarlega stein
+						roids.splice(i, 1);
+
+						break;
+					}
+				}
+			}
 
 			//teikna loftsteina
 			var x, y, r, a, offs, vert;
@@ -258,7 +324,7 @@
                     y + r * offs[0] * Math.sin(a)
                 );
 
-				//teikna 2D polygon
+				//teikna 2D polygon fyrir loftsteinana
 				for (var j = 1; j < vert; j++) {
                     ctx.lineTo(
                         x + r * offs[j] * Math.cos(a + j * Math.PI * 2 / vert),
@@ -313,8 +379,33 @@
 				ship.y = 0 - ship.r
 			} 
 
-			
-			for (var i = 0; i < roids.length; i++)			
+			//hreyfa skotinn
+			for (var i = ship.lasers.length - 1; i >= 0; i--) {
+				//kikja a skot ferdalengd
+				if (ship.lasers[i].dist > LASER_DIST * canv.width) {//villa lagad: nota "lasers" ekki "laser"
+					ship.lasers.splice(i, 1);//"splice" fjarlaegir skotid fra leikin
+					continue;
+				}
+
+				//hreyfir
+				ship.lasers[i].x += ship.lasers[i].xv;
+				ship.lasers[i].y += ship.lasers[i].yv;
+
+				//reikna hversu langt skotinn hafa farid
+				ship.lasers[i].dist += Math.sqrt(Math.pow(ship.lasers[i].xv, 2) + Math.pow(ship.lasers[i].yv, 2));
+
+				//hondla skja bordanna fyrir skotinn
+				if (ship.lasers[i].x < 0) {
+					ship.lasers[i].x = canv.width;
+				} else if (ship.lasers[i].x > canv.width) {
+					ship.lasers[i].x = 0
+				}
+				if (ship.lasers[i].y < 0) {
+					ship.lasers[i].y = canv.height;
+				} else if (ship.lasers[i].y > canv.height) {
+					ship.lasers[i].y = 0
+				}
+			}		
 
 			//hreyfa loftsteinana
 			for (var i = 0; i < roids.length; i++) {
