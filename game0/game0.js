@@ -4,11 +4,15 @@
 		const FPS = 30; //frames per second
 
 		const FRICTION = 0.7; // loft motkraftur coefficient, 0 = no friction, 1 = lots of friction
+
 		const SHIP_SIZE = 30; // haed skip i pixels
 		const SHIP_THRUST = 5; //hrodum skipins i pixels hverja sekundur
 		const TURN_SPEED = 360; // beygju hradi i gradur a sekundu
+		const SHIP_EXPLODE_DUR = 0.3; //timabil af skip sprengingu
+		const SHIP_BLINK_DUR = 0.1; //hversu hratt skipid blikkar þegar það hefur "i-frames"
+		const SHIP_INV_DUR = 3;//"i-frame" timabil þegar skipid kemur a skjainn
 
-		const SHOW_BOUNDING = true; //syna/fela arekstrar
+		const SHOW_BOUNDING = false; //syna/fela arekstrar hringi
 		const SHOW_CENTRE_DOT = true; //syna/fela punktinn i midju skipinnu
 
 		const ROIDS_NUM = 7; //hversu margar loftsteinar leikurinn byrjar med
@@ -21,18 +25,7 @@
 		var canv = document.getElementById("gameCanvas");
 		var ctx = canv.getContext("2d");
 
-		var ship = { //hvar skipid er og onnur properties
-			x: canv.width / 2,
-			y: canv.height /2,
-			r: SHIP_SIZE / 2,
-			a: 90 / 180*Math.PI,  //convert to radians
-			rot: 0,
-			thrusting: false,
-			thrust: {//heldur hreyfiorku
-				x: 0,
-				y: 0
-			}
-		}
+		var ship = newShip();
 
 		var roids = [];
 		createAsteroidBelt();//byr til loftsteina
@@ -60,6 +53,11 @@
 		function distBetweenPoints(x1, y1, x2, y2) {//stjornar fjarlegd af hvar loftsteinar mega byrja
 			return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
 		};
+
+		function explodeShip() {
+			ship.explodeTime = Math.ceil(SHIP_EXPLODE_DUR * FPS);
+
+		}
 
 		function keyDown(ev){
 			switch(ev.keyCode){
@@ -111,7 +109,28 @@
 			return roid;
 		}
 
+		function newShip() {//byr til fyrsta skipid og getur gert það aftur
+			return { //hvar skipid er og onnur properties
+				x: canv.width / 2,
+				y: canv.height /2,
+				r: SHIP_SIZE / 2,
+				a: 90 / 180*Math.PI,  //convert to radians
+				blinkNum: Math.ceil(SHIP_INV_DUR / SHIP_BLINK_DUR),
+				blinkTime: Math.ceil(SHIP_BLINK_DUR * FPS),
+				explodeTime: 0,
+				rot: 0,
+				thrusting: false,
+				thrust: {//heldur hreyfiorku
+					x: 0,
+					y: 0
+				}
+			}
+		}
+
 		function update() {
+			var blinkOn = ship.blinkNum % 2 == 0;//reikning tengd hvenaer skipid blikkar
+			var exploding = ship.explodeTime > 0;//reikning tengd hvenaer skipid springur
+
 			// teiknar bakrunnin
 			ctx.fillStyle = "black"
 			ctx.fillRect(0,0, canv.width, canv.height);
@@ -122,26 +141,27 @@
 				ship.thrust.y -= SHIP_THRUST * Math.sin(ship.a) / FPS;
 				
 				//teikna bakeldinn
-
-				ctx.fillStyle = "orange"
-				ctx.strokeStyle = "cyan"
-				ctx.lineWidth = SHIP_SIZE / 10;
-				ctx.beginPath();
-				ctx.moveTo( // rear left
-					ship.x - ship.r * (2/3 * Math.cos(ship.a) + 0.5 * Math.sin(ship.a)),
-					ship.y + ship.r * (2/3 * Math.sin(ship.a) - 0.5 * Math.cos(ship.a))
-				);
-				ctx.lineTo( //aftan skipid
-					ship.x - ship.r * (5/3 * Math.cos(ship.a)),
-					ship.y + ship.r * (5/3 * Math.sin(ship.a))
-				);
-				ctx.lineTo( //rear right ship
-					ship.x - ship.r * (2/3 * Math.cos(ship.a) - 0.5 * Math.sin(ship.a)),
-					ship.y + ship.r * (2/3 * Math.sin(ship.a) + 0.5 * Math.cos(ship.a))
-				);
-				ctx.closePath();
-				ctx.fill();
-				ctx.stroke();
+				if (!exploding && blinkOn) {//<= slekkur a eldinn ef skipid springur
+					ctx.fillStyle = "orange"
+					ctx.strokeStyle = "cyan"
+					ctx.lineWidth = SHIP_SIZE / 10;
+					ctx.beginPath();
+					ctx.moveTo( // rear left
+						ship.x - ship.r * (2/3 * Math.cos(ship.a) + 0.5 * Math.sin(ship.a)),
+						ship.y + ship.r * (2/3 * Math.sin(ship.a) - 0.5 * Math.cos(ship.a))
+					);
+					ctx.lineTo( //aftan skipid
+						ship.x - ship.r * (5/3 * Math.cos(ship.a)),
+						ship.y + ship.r * (5/3 * Math.sin(ship.a))
+					);
+					ctx.lineTo( //rear right ship
+						ship.x - ship.r * (2/3 * Math.cos(ship.a) - 0.5 * Math.sin(ship.a)),
+						ship.y + ship.r * (2/3 * Math.sin(ship.a) + 0.5 * Math.cos(ship.a))
+					);
+					ctx.closePath();
+					ctx.fill();
+					ctx.stroke();
+				}
 
 			} else {
 				ship.thrust.x -= FRICTION * ship.thrust.x / FPS;
@@ -149,23 +169,63 @@
 			}
 
 			// teiknar thrihyrnt skip
-			ctx.strokeStyle = "white";//breyta skip litid seinna
-			ctx.lineWidth = SHIP_SIZE / 20;
-			ctx.beginPath();
-			ctx.moveTo( // nose of the ship
-				ship.x + 4/3 * ship.r * Math.cos(ship.a),
-				ship.y - 4/3 * ship.r * Math.sin(ship.a)
-			);
-			ctx.lineTo( //rear left ship
-				ship.x - ship.r * (2/3 * Math.cos(ship.a) + Math.sin(ship.a)),
-				ship.y + ship.r * (2/3 * Math.sin(ship.a) - Math.cos(ship.a))
-			);
-			ctx.lineTo( //rear right ship
-				ship.x - ship.r * (2/3 * Math.cos(ship.a) - Math.sin(ship.a)),
-				ship.y + ship.r * (2/3 * Math.sin(ship.a) + Math.cos(ship.a))
-			);
-			ctx.closePath();
-			ctx.stroke();
+			if (!exploding) {//ef skipid springur mun þetta if passa það verð ekki teiknað aftur
+				if (blinkOn) {
+					ctx.strokeStyle = "white";//breyta skip litid seinna
+					ctx.lineWidth = SHIP_SIZE / 20;
+					ctx.beginPath();
+					ctx.moveTo( // nose of the ship
+						ship.x + 4/3 * ship.r * Math.cos(ship.a),
+						ship.y - 4/3 * ship.r * Math.sin(ship.a)
+					);
+					ctx.lineTo( //rear left ship
+						ship.x - ship.r * (2/3 * Math.cos(ship.a) + Math.sin(ship.a)),
+						ship.y + ship.r * (2/3 * Math.sin(ship.a) - Math.cos(ship.a))
+					);
+					ctx.lineTo( //rear right ship
+						ship.x - ship.r * (2/3 * Math.cos(ship.a) - Math.sin(ship.a)),
+						ship.y + ship.r * (2/3 * Math.sin(ship.a) + Math.cos(ship.a))
+					);
+					ctx.closePath();
+					ctx.stroke();
+				}
+				//hondla blikk
+				if (ship.blinkNum > 0) {
+					//laekka blikk tima
+					ship.blinkTime--;
+
+					//laekka blikk numer
+					if (ship.blinkTime == 0){
+						ship.blinkTime = Math.ceil(SHIP_BLINK_DUR * FPS);
+						ship.blinkNum--;
+					}
+				}
+			} else {
+				//teikna sprengingu
+				ctx.fillStyle = "darkred";
+				ctx.beginPath();
+				ctx.arc(ship.x, ship.y, ship.r * 1.7, 0, Math.PI*2, false);
+				ctx.fill();
+				ctx.fillStyle = "red";
+				ctx.beginPath();
+				ctx.arc(ship.x, ship.y, ship.r * 1.4, 0, Math.PI*2, false);
+				ctx.fill();
+				ctx.fillStyle = "orange";
+				ctx.beginPath();
+				ctx.arc(ship.x, ship.y, ship.r * 1.1, 0, Math.PI*2, false);
+				ctx.fill();
+				ctx.fillStyle = "yellow";
+				ctx.beginPath();
+				ctx.arc(ship.x, ship.y, ship.r * 0.8, 0, Math.PI*2, false);
+				ctx.fill();
+				ctx.stroke();
+				ctx.fillStyle = "LightGoldenRodYellow";
+				ctx.beginPath();
+				ctx.arc(ship.x, ship.y, ship.r * 0.5, 0, Math.PI*2, false);
+				ctx.fill();
+				ctx.stroke();
+			}
+			
 
 			if (SHOW_BOUNDING){//reikningar og teikning af "collision" fyrir skipid
 				ctx.strokeStyle = "lime";
@@ -174,13 +234,13 @@
 				ctx.stroke();
 
 			}
-			//halda afram her 1:01:19
+
 
 			//teikna loftsteina
-			ctx.strokeStyle = "slategrey";
-			ctx.lineWidth = SHIP_SIZE / 20;
 			var x, y, r, a, offs, vert;
 			for (var i = 0; i < roids.length; i++) {
+				ctx.strokeStyle = "slategrey";
+				ctx.lineWidth = SHIP_SIZE / 20;
 				
 				//na i loftsteina properties
 				x = roids[i].x;
@@ -208,30 +268,40 @@
 				ctx.closePath();
 				ctx.stroke();
 
-				//hreyfa loftsteinin
-				roids[i].x += roids[i].xv; //xv = x velocity átt
-				roids[i].y += roids[i].yv;
+				if (SHOW_BOUNDING){//reikningar og teikning af "collision" fyrir loftsteinana
+					ctx.strokeStyle = "red";
+					ctx.beginPath();
+					ctx.arc(x, y, r, 0, Math.PI*2, false);
+					ctx.stroke();
 
-				//hondla skja bordanna
-				if (roids[i].x < 0 - roids[i].r) {
-					roids[i].x = canv.width + roids[i].r;
-				} else if (roids[i].x > canv.width + roids[i].r) {
-					roids[i].x = 0 - roids[i].r
-				}
-				if (roids[i].y < 0 - roids[i].r) {
-					roids[i].y = canv.height + roids[i].r;
-				} else if (roids[i].x > canv.height + roids[i].r) {
-					roids[i].y = 0 - roids[i].r
 				}
 			}
 
-			// snua skipid
-			ship.a += ship.rot;
-			// hreyfa skipid
-			ship.x += ship.thrust.x;
-			ship.y += ship.thrust.y;
+			//kikja hvort skipid rekst a stein
+			if (!exploding) { //stoppar hreyfingar ef skipid springur
+				if(ship.blinkNum == 0) {//kikir ef skipid hefur "i-frames" til ad vernda thad
+					for (var i = 0; i < roids.length; i++) {
+						if (distBetweenPoints(ship.x,ship.y, roids[i].x, roids[i].y) < ship.r + roids[i].r){
+							explodeShip();
+						}
+					}
+				}
 
-			//hondla ad fara i gegnum bordanna ad skjanum
+				// snua skipid
+				ship.a += ship.rot;
+
+				// hreyfa skipid
+				ship.x += ship.thrust.x;
+				ship.y += ship.thrust.y;
+			} else {
+				ship.explodeTime--;
+
+				if (ship.explodeTime == 0) {
+					ship = newShip();//callar a function sem gerir nytt skip þegar sprengingin er buinn
+				}
+			}
+
+			//hondla ad fara i gegnum bordanna ad skjanum fyrir skipid
 			if (ship.x < 0 - ship.r) {
 				ship.x = canv.width + ship.r;
 			} else if (ship.x > canv.width + ship.r){
@@ -241,6 +311,27 @@
 				ship.y = canv.height + ship.r;
 			} else if (ship.y > canv.height + ship.r){
 				ship.y = 0 - ship.r
+			} 
+
+			
+			for (var i = 0; i < roids.length; i++)			
+
+			//hreyfa loftsteinana
+			for (var i = 0; i < roids.length; i++) {
+				roids[i].x += roids[i].xv; //xv = x velocity átt
+				roids[i].y += roids[i].yv;
+
+				//hondla skja bordanna fyrir loftsteinnana
+				if (roids[i].x < 0 - roids[i].r) {
+					roids[i].x = canv.width + roids[i].r;
+				} else if (roids[i].x > canv.width + roids[i].r) {
+					roids[i].x = 0 - roids[i].r
+				}
+				if (roids[i].y < 0 - roids[i].r) {
+					roids[i].y = canv.height + roids[i].r;
+				} else if (roids[i].y > canv.height + roids[i].r) {
+					roids[i].y = 0 - roids[i].r
+				}
 			}
 
 			//centre dot/midjan ad skipid
