@@ -1,4 +1,5 @@
 //https://www.youtube.com/watch?v=H9CSWMxJx84
+//adal tutorial, onnur tutorial eru adallega litla hlutir eins og litir og links
 
 //js lint, js hint
 		const FPS = 30; //frames per second
@@ -96,12 +97,14 @@
 		};
 
 		function drawShip(x, y, a) {
-			if (lives == 2) {
+			if (lives == 3) {//breytir litid a skipnum eftir thvi hversu morg lif eru eftir
+				SHIP_COLOR = "White";
+			} else if (lives == 2) {
 				SHIP_COLOR = "royalblue";
 			} else if (lives == 1) {
 				SHIP_COLOR = "gold";
 			} 
-			ctx.strokeStyle = SHIP_COLOR;//breyta skip litid seinna
+			ctx.strokeStyle = SHIP_COLOR;//gerdi thad orduvisi olikt leidbeininga a 2:06:04
 			ctx.lineWidth = SHIP_SIZE / 20;
 			ctx.beginPath();
 			ctx.moveTo( // nose of the ship
@@ -126,10 +129,16 @@
 		}
 
 		function gameOver() {
-			//TODO gameover
+			ship.dead = true;
+			text = "Game Over";
+			textAlpha = 1.0;
 		}
 
 		function keyDown(ev){
+			if (ship.dead) {//ef skipid er "dautt" tha ekki lesa fleiri lykla
+				return;
+			}
+
 			switch(ev.keyCode){
 				case 32: //spacebar, skytur skot
 					shootLaser();
@@ -147,6 +156,10 @@
 		}
 
 		function keyUp(ev) {
+			if (ship.dead) {//ef skipid er "dautt" tha ekki lesa fleiri lykla
+				return;
+			}
+
 			switch(ev.keyCode){
 				case 32: //spacebar, stoppa og leyfa naesta skotid
 					ship.canShoot = true;
@@ -208,6 +221,7 @@
 				blinkNum: Math.ceil(SHIP_INV_DUR / SHIP_BLINK_DUR),
 				blinkTime: Math.ceil(SHIP_BLINK_DUR * FPS),
 				canShoot: true,
+				dead: false,
 				explodeTime: 0,
 				lasers: [],
 				rot: 0,
@@ -246,7 +260,7 @@
 			ctx.fillRect(0,0, canv.width, canv.height);
 
 			//yta skipid
-			if (ship.thrusting) {
+			if (ship.thrusting && !ship.dead) {
 				ship.thrust.x += SHIP_THRUST * Math.cos(ship.a) / FPS;
 				ship.thrust.y -= SHIP_THRUST * Math.sin(ship.a) / FPS;
 				
@@ -278,8 +292,8 @@
 				ship.thrust.y -= FRICTION * ship.thrust.y / FPS;//:eyes:
 			}
 
-			// teiknar thrihyrnt skip
-			if (!exploding) {//ef skipid springur mun þetta if passa það verð ekki teiknað aftur
+			// teikna thrihyrnt skip
+			if (!exploding && !ship.dead) {//ef skipid springur mun þetta if passa það verð ekki teiknað strax aftur, ef thad er engin lif tha ekki teikna lengur
 				if (blinkOn) {
 					drawShip(ship.x,ship.y, ship.a);
 				}
@@ -361,12 +375,14 @@
             	ctx.font = "small-caps " + TEXT_SIZE + "px dejavu sans mono";
             	ctx.fillText(text, canv.width /2, canv.height * 0.75);
             	textAlpha -= (1.0 / TEXT_FADE_TIME / FPS);
+            } else if (ship.dead) {//byrjar leikin aftur thegar "game over" textin er farinn
+            	newGame();
             }
 
             // teikna lif
             var lifeColour;
             for (var i = 0; i < lives; i++) {
-            	lifeColour = exploding && i == lives -1 ? "red" : SHIP_COLOR;
+            	lifeColour = exploding && i == lives - 1 ? "red" : "white";
             	drawShip(SHIP_SIZE + i * SHIP_SIZE * 1.2, SHIP_SIZE, 0.5 * Math.PI, lifeColour);
             }
 
@@ -441,7 +457,7 @@
 
 			//kikja hvort skipid rekst a stein
 			if (!exploding) { //stoppar hreyfingar ef skipid springur
-				if(ship.blinkNum == 0) {//kikir ef skipid hefur "i-frames" til ad vernda thad
+				if(ship.blinkNum == 0 && !ship.dead) {//kikir ef skipid hefur "i-frames" til ad vernda thad
 					for (var i = 0; i < roids.length; i++) {
 						if (distBetweenPoints(ship.x,ship.y, roids[i].x, roids[i].y) < ship.r + roids[i].r){
 							explodeShip();
