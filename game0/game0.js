@@ -5,6 +5,8 @@
 
 		const FRICTION = 0.7; // loft motkraftur coefficient, 0 = no friction, 1 = lots of friction
 
+		const GAME_LIVES = 3; //byrjunar numer ad lif sem eru eftir
+
 		const SHIP_SIZE = 30; // haed skip i pixels
 		const SHIP_THRUST = 5; //hrodum skipins i pixels hverja sekundur
 		const TURN_SPEED = 360; // beygju hradi i gradur a sekundu
@@ -33,12 +35,14 @@
 		const TEXT_FADE_TIME = 2.5; //hversu lengi textinn verdur ekki gegnsae
 		const TEXT_SIZE = 40; //haed text font i pixlum
 
+
+		let SHIP_COLOR = "white"; //hvada litur skipid er
 		
 		var canv = document.getElementById("gameCanvas");
 		var ctx = canv.getContext("2d");
 
 		//setur up leikja parameters
-		var level, roids, ship, text, textAlpha;//alpha er fyrir gegnsaei
+		var level, lives, roids, ship, text, textAlpha;//alpha er fyrir gegnsaei
 		newGame();
 
 		
@@ -91,9 +95,38 @@
 			return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
 		};
 
+		function drawShip(x, y, a) {
+			if (lives == 2) {
+				SHIP_COLOR = "royalblue";
+			} else if (lives == 1) {
+				SHIP_COLOR = "gold";
+			} 
+			ctx.strokeStyle = SHIP_COLOR;//breyta skip litid seinna
+			ctx.lineWidth = SHIP_SIZE / 20;
+			ctx.beginPath();
+			ctx.moveTo( // nose of the ship
+				x + 4/3 * ship.r * Math.cos(a),
+				y - 4/3 * ship.r * Math.sin(a)
+			);
+			ctx.lineTo( //rear left ship
+				x - ship.r * (2/3 * Math.cos(a) + Math.sin(a)),
+				y + ship.r * (2/3 * Math.sin(a) - Math.cos(a))
+			);
+			ctx.lineTo( //rear right ship
+				x - ship.r * (2/3 * Math.cos(a) - Math.sin(a)),
+				y + ship.r * (2/3 * Math.sin(a) + Math.cos(a))
+			);
+			ctx.closePath();
+			ctx.stroke();
+		}
+
 		function explodeShip() {
 			ship.explodeTime = Math.ceil(SHIP_EXPLODE_DUR * FPS);
 
+		}
+
+		function gameOver() {
+			//TODO gameover
 		}
 
 		function keyDown(ev){
@@ -155,6 +188,7 @@
 
 		function newGame() {
 			level = 0;
+			lives = GAME_LIVES;
 			ship = newShip();//setur upp skipid
 			newLevel();
 		}
@@ -247,23 +281,7 @@
 			// teiknar thrihyrnt skip
 			if (!exploding) {//ef skipid springur mun þetta if passa það verð ekki teiknað aftur
 				if (blinkOn) {
-					ctx.strokeStyle = "white";//breyta skip litid seinna
-					ctx.lineWidth = SHIP_SIZE / 20;
-					ctx.beginPath();
-					ctx.moveTo( // nose of the ship
-						ship.x + 4/3 * ship.r * Math.cos(ship.a),
-						ship.y - 4/3 * ship.r * Math.sin(ship.a)
-					);
-					ctx.lineTo( //rear left ship
-						ship.x - ship.r * (2/3 * Math.cos(ship.a) + Math.sin(ship.a)),
-						ship.y + ship.r * (2/3 * Math.sin(ship.a) - Math.cos(ship.a))
-					);
-					ctx.lineTo( //rear right ship
-						ship.x - ship.r * (2/3 * Math.cos(ship.a) - Math.sin(ship.a)),
-						ship.y + ship.r * (2/3 * Math.sin(ship.a) + Math.cos(ship.a))
-					);
-					ctx.closePath();
-					ctx.stroke();
+					drawShip(ship.x,ship.y, ship.a);
 				}
 				//hondla blikk
 				if (ship.blinkNum > 0) {
@@ -337,10 +355,19 @@
 
             //teikna leikja texta
             if (textAlpha >= 0) {
+            	ctx.testAlign = "center";
+            	ctx.textBaseline = "middle";
             	ctx.fillStyle = "rgba(255, 255, 255, " + textAlpha + ")";
             	ctx.font = "small-caps " + TEXT_SIZE + "px dejavu sans mono";
             	ctx.fillText(text, canv.width /2, canv.height * 0.75);
             	textAlpha -= (1.0 / TEXT_FADE_TIME / FPS);
+            }
+
+            // teikna lif
+            var lifeColour;
+            for (var i = 0; i < lives; i++) {
+            	lifeColour = exploding && i == lives -1 ? "red" : SHIP_COLOR;
+            	drawShip(SHIP_SIZE + i * SHIP_SIZE * 1.2, SHIP_SIZE, 0.5 * Math.PI, lifeColour);
             }
 
 			//kikja þegar skot hitta loftsteina
@@ -431,10 +458,17 @@
 				ship.x += ship.thrust.x;
 				ship.y += ship.thrust.y;
 			} else {
+				//laekkar hversu mikill sprengi timi er eftir
 				ship.explodeTime--;
 
+				//gerir nytt skip þegar sprengingin er buinn
 				if (ship.explodeTime == 0) {
-					ship = newShip();//callar a function sem gerir nytt skip þegar sprengingin er buinn
+					lives--;
+					if (lives == 0) {
+						gameOver();
+					} else{
+						ship = newShip();
+					}
 				}
 			}
 
