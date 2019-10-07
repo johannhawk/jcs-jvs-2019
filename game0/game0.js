@@ -20,7 +20,7 @@
 		const SHOW_CENTRE_DOT = true; //syna/fela punktinn i midju skipinnu
 
 		const ROIDS_NUM = 7; //hversu margar loftsteinar leikurinn byrjar med
-		const ROIDS_SIZE = 100; //byrjunar staerd i pixlum
+		const ROID_SIZE = 100; //byrjunar staerd i pixlum
 		const ROIDS_SPEED = 50; //hamarks byrjunar hradi i pixla hverja sekundur
 		const ROIDS_VERT = 10; //medallag tala af vertices i hverja loftsteinn
 		const ROIDS_JAG = 0.4; //hversu hvassir loftsteinar eru, 0 til 1
@@ -48,10 +48,27 @@
 				do {
 				x = Math.floor(Math.random() * canv.width);
 				y = Math.floor(Math.random() * canv.height);
-				} while (distBetweenPoints(ship.x, ship.y, x, y) < ROIDS_SIZE * 2 + ship.r); //callar a function sem stjornar hversu nalegt loftsteinar mega byrjar hja spilaran
-				roids.push(newAsteroid(x, y));
+				} while (distBetweenPoints(ship.x, ship.y, x, y) < ROID_SIZE * 2 + ship.r); //callar a function sem stjornar hversu nalegt loftsteinar mega byrjar hja spilaran
+				roids.push(newAsteroid(x, y, Math.ceil(ROID_SIZE / 2)));//
 			
 			}
+		}
+
+		function destroyAsteroid(index){
+			var x = roids[index].x;
+			var y = roids[index].y;
+			var r = roids[index].r;
+
+			//skera up loftsteinin i minni bita ef haegt
+			if (r == Math.ceil(ROID_SIZE / 2)) {
+				roids.push(newAsteroid(x,y,Math.ceil(ROID_SIZE / 4)));
+				roids.push(newAsteroid(x,y,Math.ceil(ROID_SIZE / 4)));
+			} else if (r == Math.ceil(ROID_SIZE / 4)) {
+				roids.push(newAsteroid(x,y,Math.ceil(ROID_SIZE / 8)));
+				roids.push(newAsteroid(x,y,Math.ceil(ROID_SIZE / 8)));
+			}
+			//eydileggja loftsteinin
+			roids.splice(index, 1);
 		}
 
 		function distBetweenPoints(x1, y1, x2, y2) {//stjornar fjarlegd af hvar loftsteinar mega byrja
@@ -99,13 +116,13 @@
 			}
 		}
 
-		function newAsteroid(x, y) { //hradi og stadsetningar a loftsteinum
+		function newAsteroid(x, y, r) { //hradi og stadsetningar a loftsteinum
 			var roid = {
 				x: x,
 				y: y,
 				xv: Math.random() * ROIDS_SPEED / FPS * (Math.random() < 0.5 ? 1 : -1),
 				yv: Math.random() * ROIDS_SPEED / FPS * (Math.random() < 0.5 ? 1 : -1),//var med vandamal þar sem eg var med tvo xv enn eg loksins tok eftir og breytti einn yfir i yv eftir ad bera saman grunnskrainn vid mina utgafu
-				r: ROIDS_SIZE / 2, //radius/staerd
+				r: r, //radius/staerd
 				a: Math.random() * Math.PI * 2, //i radians
 				vert: Math.floor(Math.random() * (ROIDS_VERT + 1) + ROIDS_VERT /2), //vertex
 				offs: []//vertex offset
@@ -295,7 +312,7 @@
 						ship.lasers.splice(j,1);
 
 						//fjarlega stein
-						roids.splice(i, 1);
+						destroyAsteroid(i);
 
 						break;
 					}
@@ -349,6 +366,7 @@
 					for (var i = 0; i < roids.length; i++) {
 						if (distBetweenPoints(ship.x,ship.y, roids[i].x, roids[i].y) < ship.r + roids[i].r){
 							explodeShip();
+							destroyAsteroid(i);
 						}
 					}
 				}
