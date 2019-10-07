@@ -20,20 +20,29 @@
 		const SHOW_BOUNDING = false; //syna/fela arekstrar hringi
 		const SHOW_CENTRE_DOT = true; //syna/fela punktinn i midju skipinnu
 
-		const ROIDS_NUM = 7; //hversu margar loftsteinar leikurinn byrjar med
+		const ROIDS_NUM = 6; //hversu margar loftsteinar leikurinn byrjar med
 		const ROID_SIZE = 100; //byrjunar staerd i pixlum
 		const ROIDS_SPEED = 50; //hamarks byrjunar hradi i pixla hverja sekundur
 		const ROIDS_VERT = 10; //medallag tala af vertices i hverja loftsteinn
 		const ROIDS_JAG = 0.4; //hversu hvassir loftsteinar eru, 0 til 1
 
+		const ROIDS_PTS_LGE = 20;//stig fyrir stora steina
+		const ROIDS_PTS_MED = 50;//stig fyrir midlungs steina
+		const ROIDS_PTS_SML = 100;//stig fyrir litla steina
+
+		const TEXT_FADE_TIME = 2.5; //hversu lengi textinn verdur ekki gegnsae
+		const TEXT_SIZE = 40; //haed text font i pixlum
+
 		
 		var canv = document.getElementById("gameCanvas");
 		var ctx = canv.getContext("2d");
 
-		var ship = newShip();
+		//setur up leikja parameters
+		var level, roids, ship, text, textAlpha;//alpha er fyrir gegnsaei
+		newGame();
 
-		var roids = [];
-		createAsteroidBelt();//byr til loftsteina
+		
+		
 
 		//event handlers, tekur eftir hvort lyklar a lyklabordinnu eru snert
 		document.addEventListener("keydown", keyDown);
@@ -45,7 +54,7 @@
 		function createAsteroidBelt() {
 			roids = [];
 			var x, y;
-			for (var i = 0; i < ROIDS_NUM; i++) {
+			for (var i = 0; i < ROIDS_NUM + level; i++) {
 				do {
 				x = Math.floor(Math.random() * canv.width);
 				y = Math.floor(Math.random() * canv.height);
@@ -70,6 +79,12 @@
 			}
 			//eydileggja loftsteinin
 			roids.splice(index, 1);
+
+			//nytt bord thegar allir steinarnir eru farinn
+			if (roids.length == 0) {
+				level++;
+				newLevel();
+			}
 		}
 
 		function distBetweenPoints(x1, y1, x2, y2) {//stjornar fjarlegd af hvar loftsteinar mega byrja
@@ -118,11 +133,12 @@
 		}
 
 		function newAsteroid(x, y, r) { //hradi og stadsetningar a loftsteinum
+			var lvlMult = 1 + 0.1 * level;//haekkar loftsteina hradan eftir hvada bord thu ert i
 			var roid = {
 				x: x,
 				y: y,
-				xv: Math.random() * ROIDS_SPEED / FPS * (Math.random() < 0.5 ? 1 : -1),
-				yv: Math.random() * ROIDS_SPEED / FPS * (Math.random() < 0.5 ? 1 : -1),//var med vandamal þar sem eg var med tvo xv enn eg loksins tok eftir og breytti einn yfir i yv eftir ad bera saman grunnskrainn vid mina utgafu
+				xv: Math.random() * ROIDS_SPEED * lvlMult / FPS * (Math.random() < 0.5 ? 1 : -1),
+				yv: Math.random() * ROIDS_SPEED * lvlMult / FPS * (Math.random() < 0.5 ? 1 : -1),//var med vandamal þar sem eg var med tvo xv enn eg loksins tok eftir og breytti einn yfir i yv eftir ad bera saman grunnskrainn vid mina utgafu
 				r: r, //radius/staerd
 				a: Math.random() * Math.PI * 2, //i radians
 				vert: Math.floor(Math.random() * (ROIDS_VERT + 1) + ROIDS_VERT /2), //vertex
@@ -135,6 +151,18 @@
             }
 
 			return roid;
+		}
+
+		function newGame() {
+			level = 0;
+			ship = newShip();//setur upp skipid
+			newLevel();
+		}
+
+		function newLevel() {
+			text = "Level "+ (level+1)
+			textAlpha = 1.0;
+			createAsteroidBelt();//byr til loftsteina
 		}
 
 		function newShip() {//byr til fyrsta skipid og getur gert það aftur
@@ -305,6 +333,14 @@
                     ctx.arc(ship.lasers[i].x, ship.lasers[i].y, ship.r * 0.25, 0, Math.PI * 2, false);
                     ctx.fill();
                 }
+            }
+
+            //teikna leikja texta
+            if (textAlpha >= 0) {
+            	ctx.fillStyle = "rgba(255, 255, 255, " + textAlpha + ")";
+            	ctx.font = "small-caps " + TEXT_SIZE + "px dejavu sans mono";
+            	ctx.fillText(text, canv.width /2, canv.height * 0.75);
+            	textAlpha -= (1.0 / TEXT_FADE_TIME / FPS);
             }
 
 			//kikja þegar skot hitta loftsteina
