@@ -23,15 +23,15 @@
 		const SHOW_BOUNDING = false; //syna/fela arekstrar hringi
 		const SHOW_CENTRE_DOT = true; //syna/fela punktinn i midju skipinnu
 
-		const ROIDS_NUM = 6; //hversu margar loftsteinar leikurinn byrjar med
+		const ROID_NUM = 6; //hversu margar loftsteinar leikurinn byrjar med
 		const ROID_SIZE = 100; //byrjunar staerd i pixlum
-		const ROIDS_SPEED = 50; //hamarks byrjunar hradi i pixla hverja sekundur
-		const ROIDS_VERT = 10; //medallag tala af vertices i hverja loftsteinn
-		const ROIDS_JAG = 0.4; //hversu hvassir loftsteinar eru, 0 til 1
+		const ROID_SPEED = 50; //hamarks byrjunar hradi i pixla hverja sekundur
+		const ROID_VERT = 10; //medallag tala af vertices i hverja loftsteinn
+		const ROID_JAG = 0.4; //hversu hvassir loftsteinar eru, 0 til 1
 
-		const ROIDS_PTS_LGE = 20;//stig fyrir stora steina
-		const ROIDS_PTS_MED = 50;//stig fyrir midlungs steina
-		const ROIDS_PTS_SML = 100;//stig fyrir litla steina
+		const ROID_PTS_LGE = 20;//stig fyrir stora steina
+		const ROID_PTS_MED = 50;//stig fyrir midlungs steina
+		const ROID_PTS_SML = 100;//stig fyrir litla steina
 
 		const TEXT_FADE_TIME = 2.5; //hversu lengi textinn verdur ekki gegnsae
 		const TEXT_SIZE = 40; //haed text font i pixlum
@@ -43,7 +43,7 @@
 		var ctx = canv.getContext("2d");
 
 		//setur up leikja parameters
-		var level, lives, roids, ship, text, textAlpha;//alpha er fyrir gegnsaei
+		var level, lives, score, roids, ship, text, textAlpha;//alpha er fyrir gegnsaei
 		newGame();
 
 		
@@ -59,7 +59,7 @@
 		function createAsteroidBelt() {
 			roids = [];
 			var x, y;
-			for (var i = 0; i < ROIDS_NUM + level; i++) {
+			for (var i = 0; i < ROID_NUM + level; i++) {
 				do {
 				x = Math.floor(Math.random() * canv.width);
 				y = Math.floor(Math.random() * canv.height);
@@ -78,9 +78,13 @@
 			if (r == Math.ceil(ROID_SIZE / 2)) {
 				roids.push(newAsteroid(x,y,Math.ceil(ROID_SIZE / 4)));
 				roids.push(newAsteroid(x,y,Math.ceil(ROID_SIZE / 4)));
+				score += ROID_PTS_LGE;
 			} else if (r == Math.ceil(ROID_SIZE / 4)) {
 				roids.push(newAsteroid(x,y,Math.ceil(ROID_SIZE / 8)));
 				roids.push(newAsteroid(x,y,Math.ceil(ROID_SIZE / 8)));
+				score += ROID_PTS_MED;
+			} else {
+				score += ROID_PTS_SML;
 			}
 			//eydileggja loftsteinin
 			roids.splice(index, 1);
@@ -183,17 +187,17 @@
 			var roid = {
 				x: x,
 				y: y,
-				xv: Math.random() * ROIDS_SPEED * lvlMult / FPS * (Math.random() < 0.5 ? 1 : -1),
-				yv: Math.random() * ROIDS_SPEED * lvlMult / FPS * (Math.random() < 0.5 ? 1 : -1),//var med vandamal þar sem eg var med tvo xv enn eg loksins tok eftir og breytti einn yfir i yv eftir ad bera saman grunnskrainn vid mina utgafu
+				xv: Math.random() * ROID_SPEED * lvlMult / FPS * (Math.random() < 0.5 ? 1 : -1),
+				yv: Math.random() * ROID_SPEED * lvlMult / FPS * (Math.random() < 0.5 ? 1 : -1),//var med vandamal þar sem eg var med tvo xv enn eg loksins tok eftir og breytti einn yfir i yv eftir ad bera saman grunnskrainn vid mina utgafu
 				r: r, //radius/staerd
 				a: Math.random() * Math.PI * 2, //i radians
-				vert: Math.floor(Math.random() * (ROIDS_VERT + 1) + ROIDS_VERT /2), //vertex
+				vert: Math.floor(Math.random() * (ROID_VERT + 1) + ROID_VERT /2), //vertex
 				offs: []//vertex offset
 			};
 			
 			//bua til og fjolga vertex offset array
 			for (var i = 0; i < roid.vert; i++) {
-                roid.offs.push(Math.random() * ROIDS_JAG * 2 + 1 - ROIDS_JAG);
+                roid.offs.push(Math.random() * ROID_JAG * 2 + 1 - ROID_JAG);
             }
 
 			return roid;
@@ -201,6 +205,7 @@
 
 		function newGame() {
 			level = 0;
+			score = 0;
 			lives = GAME_LIVES;
 			ship = newShip();//setur upp skipid
 			newLevel();
@@ -369,7 +374,7 @@
 
             //teikna leikja texta
             if (textAlpha >= 0) {
-            	ctx.testAlign = "center";
+            	ctx.textAlign = "center";
             	ctx.textBaseline = "middle";
             	ctx.fillStyle = "rgba(255, 255, 255, " + textAlpha + ")";
             	ctx.font = "small-caps " + TEXT_SIZE + "px dejavu sans mono";
@@ -385,6 +390,15 @@
             	lifeColour = exploding && i == lives - 1 ? "red" : "white";
             	drawShip(SHIP_SIZE + i * SHIP_SIZE * 1.2, SHIP_SIZE, 0.5 * Math.PI, lifeColour);
             }
+
+            // teikna stig
+            ctx.textAlign = "right";
+        	ctx.textBaseline = "middle";
+		   	ctx.fillStyle = "white";
+		   	ctx.font = TEXT_SIZE + "px dejavu sans mono";
+		   	ctx.fillText(score, canv.width - SHIP_SIZE / 2 - 10, SHIP_SIZE);
+            	
+
 
 			//kikja þegar skot hitta loftsteina
 			var ax, ay, ar, lx, ly;//ax/ay eru fyrir loftsteina, lx/ly eru fyrir skotin
