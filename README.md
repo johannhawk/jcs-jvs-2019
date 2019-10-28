@@ -1,3 +1,8 @@
+## Verkefni 5
+
+5.2: [Link](https://johannhawk.github.io/jcs-jvs-2019/verk5/verk52.html).
+
+5.3: [Link](https://johannhawk.github.io/jcs-jvs-2019/verk5/verk53.html).
 
 ## Javascript leikja verkefni
 
