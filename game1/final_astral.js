@@ -18,7 +18,7 @@ const FPS = 30; //frames per second
 
 		var FireToggle = false;
 
-		const SHOW_BOUNDING = true; //syna/fela arekstrar hringi
+		const SHOW_BOUNDING = false; //syna/fela arekstrar hringi
 		const SHOW_CENTRE_DOT = true; //syna/fela punktinn i midju skipinnu
 
 		const ROID_NUM = 8; //hversu margar loftsteinar leikurinn byrjar med
