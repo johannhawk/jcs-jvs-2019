@@ -3,12 +3,14 @@ const FPS = 30;
 
 var shipColor = 'white';
 
-let canv = document.getElementById("gameCanvas");
-var ctx = canv.getContext("2d");
+let canv;
+let ctx;
+let canvasWidth = 1400;
+let canvasHeight = 700; 
 let keys = [];
 
 //skipid
-/*var ship = {
+/*var lship = {
 	x: canv.width/2,
 	y: canv.height/2,
 	r: SHIP_S
@@ -17,6 +19,8 @@ document.addEventListener('DOMContentLoaded', SetupCanvas);
 function SetupCanvas(){
 	canv = document.getElementById('gameCanvas');
 	ctx = canv.getContext('2d');
+	canv.width = canvasWidth;
+	canv.height = canvasHeight;
 	ctx.fillStyle = "black";
 	ctx.fillRect(0,0,canv.width, canv.height);
 	document.body.addEventListener("keydown", function(e){
@@ -36,8 +40,8 @@ function SetupCanvas(){
 class Ship {
 	constructor(){
 		this.visible = true;
-		this.x = canv.width/2;
-		this.y = canv.height/2;
+		this.x = canvasWidth/2;
+		this.y = canvasHeight/2;
 		this.movingForward = false;
 		this.speed = 0.1;
 		this.velX = 0;
@@ -91,7 +95,7 @@ class Ship {
 		ctx.stroke();
 	}
 }
-let ship = new Ship();
+let lship = new Ship();
 
 function updateRender() {
 	/*
@@ -100,19 +104,19 @@ function updateRender() {
 	ctx.fillRect(0, 0, canv.width, canv.height);*/
 	//ekki missi 2 og halfa klukkitima med ad setja in = milli fillRect og () aftur
 	console.log("ping");
-	ship.movingForward = (keys[87]);//87 er kodi fyrir "w", þegar w er ýtt þá tekur það eftir fyrir notkun í flug kóðann
+	lship.movingForward = (keys[87]);//87 er kodi fyrir "w", þegar w er ýtt þá tekur það eftir fyrir notkun í flug kóðann
 	if(keys[68]){
-		ship.Rotate(1);
+		lship.Rotate(1);
 	}//68 er kodi fyrir "d", snyr skipid
 	if(keys[65]){
-		ship.Rotate(-1);
+		lship.Rotate(-1);
 	}//68 er kodi fyrir "a", snyr skipid í hina áttina
 
 	//hreinsar og endurteiknar skjáinn
 	ctx.clearRect(0,0, canv.width,canv.height);
 	
-	ship.shipUpdate();
-	ship.Draw();
+	lship.shipUpdate();
+	lship.Draw();
 	requestAnimationFrame(updateRender);
 	
 }
