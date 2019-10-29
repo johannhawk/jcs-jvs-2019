@@ -16,8 +16,6 @@ const FPS = 30; //frames per second
 		const LASER_SPEED = 500; //hversu hratt skotinn fara a pixlar/sekundur
 		const LASER_DIST = 0.9; //hversu lengi skotinn verda a skjainn eftir skja vidd
 
-		var FireToggle = false;
-
 		const SHOW_BOUNDING = false; //syna/fela arekstrar hringi
 		const SHOW_CENTRE_DOT = true; //syna/fela punktinn i midju skipinnu
 
