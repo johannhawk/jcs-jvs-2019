@@ -6,13 +6,13 @@
 
 ## Verkefni 6
 
-D4 Array Day 1: [Link](https://johannhawk.github.io/jcs-jvs-2019/verk6/d4%20Array%20Day%201.html)
+D4 Array Day 1: [Link](https://johannhawk.github.io/jcs-jvs-2019/verk6/d4.html)
 
-D7 Array Day 2: [Link](https://johannhawk.github.io/jcs-jvs-2019/verk6/d7%20Array%20Day%202.html)
+D7 Array Day 2: [Link](https://johannhawk.github.io/jcs-jvs-2019/verk6/d7.html)
 
-D14 js reference vs copy: [Link](https://johannhawk.github.io/jcs-jvs-2019/verk6/d14%20js%20reference%20vs%20copy.html)
+D14 js reference vs copy: [Link](https://johannhawk.github.io/jcs-jvs-2019/verk6/d14.html)
 
-D17 sort bands: [Link](https://johannhawk.github.io/jcs-jvs-2019/verk6/d17%20sort%20bands.html)
+D17 sort bands: [Link](https://johannhawk.github.io/jcs-jvs-2019/verk6/d17.html)
 
 Slider: [Link](https://johannhawk.github.io/jcs-jvs-2019/verk6/v6_sliders.html)
 
