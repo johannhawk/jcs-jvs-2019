@@ -4,6 +4,18 @@
 
 5.3: [Link](https://johannhawk.github.io/jcs-jvs-2019/verk5/verk53.html).
 
+## Verkefni 6
+%20
+D4 Array Day 1: [Link](https://johannhawk.github.io/jcs-jvs-2019/verk6/d4%20Array%20Day%201.html)
+
+D7 Array Day 2: [Link]()
+
+D14 js reference vs copy: [Link]()
+
+D17 sort bands: [Link]()
+
+Slider: [Link]()
+
 ## Javascript leikja verkefni
 
 ← →: Snúa skipið
