@@ -20,51 +20,71 @@
     //name = 'Wesley';
     //console.log(name, name2);
     // Let's say we have an array
+    //segjum við höfum array
     const players = ['Wes', 'Sarah', 'Ryan', 'Poppy'];
     // and we want to make a copy of it.
+    //og við viljum eintak af því
     const team = players;
 
     console.log(players, team);
     // You might think we can just do something like this:
+    //þú gætir hugsað við getum bara gert eitthvað eins og þetta:
     //team[3] = 'Lux';
     // however what happens when we update that array?
+    //enn hvað gerist þegar við uppfærum þennan array?
 
 
     // now here is the problem!
+    //núna er hérna vandamál
 
     // oh no - we have edited the original array too!
+    //oh nei - við höfum breytt upprunalega array líka
     // Why? It's because that is an array reference, not an array copy. They both point to the same array!
+    //af hverju? vegna þess þetta er array reference, ekki array copy. Þau bæði benda á sama 'array'
     // So, how do we fix this? We take a copy instead!
+    //hvernig lögum við það? við tökum copy í staðinn með .slice()
     const team2 = players.slice();
 
     // one way
+    //einn aðferð
 
     // or create a new array and concat the old one in
+    //eða búa til nýtt array og 'concat' það gamla inn
     const team3 = [].concat(players);
     // or use the new ES6 Spread
+    //eða nota nýja ES6 Spread
     //const team4 = [...players];
     //team4[3] = 'Colt';
     //console.log(team4);
 
     const team4 = Array.from(players);
     // now when we update it, the original one isn't changed
+    //og núna þegar við uppfærum það. Það upprunalega breytist ekki.
+
     // The same thing goes for objects, let's say we have a person object
+    //það sama virkar fyrir objects, segjum við höfum person object
+
     // with Objects
+    //með Objects
     const person = {
       name: 'Wes Bos',
       age: 80
     };
     // and think we make a copy:
+    //og við höldum við gerum eintak
     //const captain = person;
     //captain.number = 99;
 
     // how do we take a copy instead?
+    //hvernig tökum við þá eintak í staðin?
     const cap2 = Object.assign({}, person, { number : 99, age: 12});
     console.log(cap2);
     // We will hopefully soon see the object ...spread
-    //const cap3 = {...person};
+    //við munum vonandi fljótt sjá "object ...spread"
+    const cap3 = {...person};
 
     // Things to note - this is only 1 level deep - both for Arrays and Objects. lodash has a cloneDeep method, but you should think twice before using it.
+    //Mundu að þetta fer bara 1 skref djúpt, bæði fyrir arrays og objects. lodash inniheldur cloneDeep aðferð enn notaðu það varlega
 
     const wes = {
       name: 'Wes',
