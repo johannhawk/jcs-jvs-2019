@@ -22,19 +22,8 @@ API tenging: [Link](https://johannhawk.github.io/jcs-jvs-2019/verk7/verk7.html)
 
 ## Javascript leikja verkefni
 
-← →: Snúa skipið
+örvaar: hreyfa
 
-↑: Ýta skipið áfram
+WASD: Skjóta
 
-Spacebar: Skjóta
-
-E: Skóta afturabak
-
-Q: Breyta lofthæð
-
-Litið á skipin og steinana breytast frá hvít til fjólublátt eftir hvaða lofthæð þeir eru á.
-Þegar loftsteinar eða skipið fara í gegnum endana á skjánum þeir munu breyta um lofthæð.
-
-Skotinn eru sama um hvaða hæð þeir eru á.
-
-[Link til leikin](https://johannhawk.github.io/jcs-jvs-2019/game1/fa.html).
+[Link til leikin](https://johannhawk.github.io/jcs-jvs-2019/game2/ok.html).
