@@ -1,5 +1,6 @@
 //hljod
-//var aud = new audio('')
+var audioElem = new Audio('thunderdome.mp3')//þarf að vera stórt A
+
 
 const refresh = 15;//refreshar á 15 ms
 const sOver = 10;//skipstaerd yfirleitt
@@ -22,6 +23,8 @@ var wl = false;
 var al = false;
 var sl = false;
 var dl = false;
+var music = false;
+var mToggle = false;
 
 /** @type {HTMLCanvasElement} */
 var canv = document.getElementById("gameCanvas");
@@ -70,6 +73,12 @@ function keyDownHandler(e) {
     else if(e.key == "d") {
         dl = true;
     }
+    else if(e.key == "m") {
+        music = true;
+    }
+    else if(e.key == "n") {
+        mToggle = true;
+    }
 
 }
 
@@ -100,6 +109,12 @@ function keyUpHandler(e) {
     }
     else if(e.key == "d") {
         dl = false;
+    }
+    else if(e.key == "m") {
+        music = false;
+    }
+    else if(e.key == "n") {
+        mToggle = false;
     }
 }
 
@@ -181,6 +196,13 @@ function controls() {
 	}
 	if (wl == true || al == true || sl == true || dl == true) {
 		fire(wl, al, sl, dl);
+	}
+	if (music == true){//svo það er léttara að stjórna tónlistinna
+		audioElem.play();
+		audioElem.muted = false;
+	}
+	if (mToggle == true){
+		audioElem.muted = true;
 	}
 
 }
