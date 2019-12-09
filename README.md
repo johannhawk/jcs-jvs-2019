@@ -30,4 +30,6 @@ M: Byrja tónlist
 
 N: Stoppa tónlist
 
+Hefur líka stigateljara
+
 [Link til leikin](https://johannhawk.github.io/jcs-jvs-2019/game2/ok.html).
