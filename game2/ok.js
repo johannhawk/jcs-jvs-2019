@@ -12,7 +12,6 @@ const rock_size = 20;
 const rock_num = 8; //hversu margar loftsteinar leikurinn byrjar med
 const rock_spd = 2;
 
-
 //skipanir
 var right = false;
 var left = false;
@@ -40,6 +39,9 @@ var ship = {
 
 //skot
 var proj = [];
+
+//stig
+var score = 0;
 
 //hlustar á alla lyklar
 document.addEventListener("keydown", keyDownHandler, false);
@@ -151,11 +153,11 @@ function fire(wl, al, sl, dl) {
 		time: 0
 	})
 }
-function newAsteroid(x, y) { //hradi og stadsetningar a loftsteinum
+function newRock(x, y) { //hradi og stadsetningar a steinum
 			var rock = {
 				x: x,
 				y: y,
-				xv: Math.random() * rock_spd * (Math.random() < 0.5 ? 1 : -1),//staerdfraedi sem passar það getur farið i margar attir
+				xv: Math.random() * rock_spd * (Math.random() < 0.5 ? 1 : -1),//staerdfraedi sem passar það getur farið i margar attir(random)
 				yv: Math.random() * rock_spd * (Math.random() < 0.5 ? 1 : -1),
 				//Math.random() * rock_spd * lvlMult / FPS * (Math.random() < 0.5 ? 1 : -1),
 			};
@@ -176,7 +178,7 @@ function create_cluster() {
 		x = Math.floor(Math.random() * canv.width);
 		y = Math.floor(Math.random() * canv.height);
 		} while (distBetweenPoints(ship.x, ship.y, x, y) < rock_size * 1.2 + ship.r); //callar a function sem stjornar hversu nalegt loftsteinar mega byrjar hja spilaran
-		rocks.push(newAsteroid(x, y, Math.ceil(rock_size / 1.2)));//
+		rocks.push(newRock(x, y, Math.ceil(rock_size / 1.2)));//
 	
 	}
 }
@@ -197,13 +199,22 @@ function controls() {
 	if (wl == true || al == true || sl == true || dl == true) {
 		fire(wl, al, sl, dl);
 	}
-	if (music == true){//svo það er léttara að stjórna tónlistinna
+	if (music == true){
 		audioElem.play();
-		audioElem.muted = false;
+		audioElem.muted = false;//svo það er léttara að stjórna tónlistinna
 	}
 	if (mToggle == true){
 		audioElem.muted = true;
 	}
+
+}
+
+function destroy_r(index){
+	
+	score += 1;//stigagjof
+	
+	//eydileggja loftsteinin
+	rocks.splice(index, 1);
 
 }
 
@@ -222,6 +233,14 @@ function draw() {
 
 	controls();
 	//----------------teikningar---------
+	// teikna stig
+    ctx.textAlign = "right";
+	ctx.textBaseline = "middle";
+   	ctx.fillStyle = "white";
+   	ctx.font = 40 + "px dejavu sans mono";//texta font staerd og stil
+   	ctx.fillText(score, canv.width - sOver / 2 - 15, sOver + 15);//stadsetning
+   	ctx.closePath();
+            	
 	//teikna skot
 	for (var i = 0; i < proj.length; i++){
 		
@@ -254,6 +273,8 @@ function draw() {
 				ctx.closePath();
 				ctx.stroke();
 			}
+
+	
 
 	//-------------hreyfingar-----
 
@@ -317,6 +338,20 @@ function draw() {
 		}
 	}
 	
+	//-----------------arekstrar---------
+	//kikja þegar skot hitta loftsteina
+	for (var i = rocks.length - 1; i >= 0; i--) {
+		// setja loop yfir skotinn
+		for (var j = proj.length - 1; j >= 0; j--) {
+			// kikja hvort skotin hitta
+			if (distBetweenPoints(rocks[i].x,rocks[i].y,proj[j].x,proj[j].y) < rock_size/2) {
+				//fjarlega stein og kveikja a skot sprengingu
+				destroy_r(i);
+				break;
+			}
+		}
+	}
+
 }
 
 setInterval(draw, refresh);
