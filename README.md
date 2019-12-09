@@ -26,4 +26,8 @@ API tenging: [Link](https://johannhawk.github.io/jcs-jvs-2019/verk7/verk7.html)
 
 WASD: Skjóta
 
+M: Byrja tónlist
+
+N: Stoppa tónlist
+
 [Link til leikin](https://johannhawk.github.io/jcs-jvs-2019/game2/ok.html).
