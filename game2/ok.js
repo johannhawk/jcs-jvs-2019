@@ -343,7 +343,7 @@ function draw() {
 	for (var i = rocks.length - 1; i >= 0; i--) {
 		// setja loop yfir skotinn
 		for (var j = proj.length - 1; j >= 0; j--) {
-			// kikja hvort skotin hitta
+			// kikja hvort skotin hitta nogu nalegt
 			if (distBetweenPoints(rocks[i].x,rocks[i].y,proj[j].x,proj[j].y) < rock_size/2) {
 				//fjarlega stein og kveikja a skot sprengingu
 				destroy_r(i);
