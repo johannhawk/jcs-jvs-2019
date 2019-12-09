@@ -303,20 +303,20 @@ function draw() {
 	for (var i = 0; i < rocks.length; i++) {
 		rocks[i].x += rocks[i].xv; //xv = x velocity átt
 		rocks[i].y += rocks[i].yv; //xy er það sama nema fyrir y áttir
-
+	
 		//hondla skja bordanna fyrir loftsteinnana
-		if (rocks[i].x < 0 - rocks[i].r) {
-			rocks[i].x = canv.width + rocks[i].r
-		} else if (rocks[i].x > canv.width + rocks[i].r) {
-			rocks[i].x = 0 - rocks[i].r
+		if (rocks[i].x < 0) {
+			rocks[i].x = canv.width
+		} else if (rocks[i].x > canv.width) {
+			rocks[i].x = 0
 		}
-		if (rocks[i].y < 0 - rocks[i].r) {
-			rocks[i].y = canv.height + rocks[i].r
-
-		} else if (rocks[i].y > canv.height + rocks[i].r) {
-			rocks[i].y = 0 - rocks[i].r
+		if (rocks[i].y < 0) {
+			rocks[i].y = canv.height
+		} else if (rocks[i].y > canv.height) {
+			rocks[i].y = 0
 		}
 	}
+	
 }
 
 setInterval(draw, refresh);
